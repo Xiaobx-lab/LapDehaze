@@ -2,7 +2,7 @@
 
 We public the network source code and datasets for the LapDehazeNet.
 
-#### Datasets
+#### Datasets:
 
 We evaluated the performance of our method on three paired public datasets, including 4KID dataset, O-haze dataset and I-haze dataset.
 
@@ -22,7 +22,7 @@ We evaluated the performance of our method on three paired public datasets, incl
 - paper:https://data.vision.ee.ethz.ch/cvl/ntire18//i-haze/I-HAZE.pdf
 - data:https://data.vision.ee.ethz.ch/cvl/ntire18//i-haze/
 
-##### Network
+##### Network:
 
 LapDehazeNet network structure in LapNet.py. The remain code will be made public after the work is officially published.
 
