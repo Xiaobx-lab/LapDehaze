@@ -63,12 +63,12 @@ class Lap_Pyramid_Conv(nn.Module):
         x_up = cc.permute(0, 1, 3, 2)
         return self.conv_gauss(x_up, 4 * self.kernel)
 
-    def conv_gauss(self, img, kernel):  # 高斯卷积
+    def conv_gauss(self, img, kernel): 
         img = torch.nn.functional.pad(img, (2, 2, 2, 2), mode='reflect')
         out = torch.nn.functional.conv2d(img, kernel, groups=img.shape[1])
         return out
 
-    def pyramid_decom(self, img):  # 拉普拉斯金字塔高频分量和低频分量的区分
+    def pyramid_decom(self, img):  
         current = img
         pyr = []
         for _ in range(self.num_high):
@@ -77,7 +77,7 @@ class Lap_Pyramid_Conv(nn.Module):
             up = self.upsample(down)
             if up.shape[2] != current.shape[2] or up.shape[3] != current.shape[3]:
                 up = nn.functional.interpolate(up, size=(current.shape[2], current.shape[3]))
-            diff = current - up # 高频残差
+            diff = current - up
             pyr.append(diff)
             current = down
         pyr.append(current)
@@ -85,7 +85,7 @@ class Lap_Pyramid_Conv(nn.Module):
 
     def pyramid_recons(self, pyr):  # list
         image = pyr[-1]
-        for level in reversed(pyr[:-1]):  # 反向遍历除了最后一个元素
+        for level in reversed(pyr[:-1]): 
             up = self.upsample(image)
             if up.shape[2] != level.shape[2] or up.shape[3] != level.shape[3]:
                 up = nn.functional.interpolate(up, size=(level.shape[2], level.shape[3]))
@@ -115,7 +115,7 @@ class Trans_high(nn.Module):
     def forward(self, x, pyr_original, fake_low):   # concat分量 lp分量list 低频处理分量
 
         pyr_result = []
-        mask = self.model(x)  # 算一个掩码出来
+        mask = self.model(x)  
         for i in range(self.num_high):
             mask = nn.functional.interpolate(mask, size=(pyr_original[-2-i].shape[2], pyr_original[-2-i].shape[3]))
             result_highfreq = torch.mul(pyr_original[-2-i], mask) + pyr_original[-2-i]
@@ -127,7 +127,7 @@ class Trans_high(nn.Module):
             result_highfreq = getattr(self, 'result_highfreq_{}'.format(str(i)))
             pyr_result.append(result_highfreq)
 
-        pyr_result.append(fake_low)  # 低频分量追加到后面即可
+        pyr_result.append(fake_low)  
 
         return pyr_result
 
@@ -152,12 +152,8 @@ class LapNet(nn.Module):
         real_A_up = nn.functional.interpolate(pyr_A[-1], size=(pyr_A[-2].shape[2], pyr_A[-2].shape[3]))
         fake_B_up = nn.functional.interpolate(fake_B_low, size=(pyr_A[-2].shape[2], pyr_A[-2].shape[3]))
         high_with_low = torch.cat([pyr_A[-2], real_A_up, fake_B_up], 1)
-        pyr_A_trans = self.trans_high(high_with_low, pyr_A, fake_B_low)  # list concat分量 lp分量list 低频处理分量
+        pyr_A_trans = self.trans_high(high_with_low, pyr_A, fake_B_low)  
         fake_B_full = self.lap_pyramid.pyramid_recons(pyr_A_trans)
         fake_B_full = self.sig(fake_B_full)
         return fake_B_full
-if __name__ == "__main__":
-    device = torch.device("cuda")
-    X = torch.Tensor(1,3,2160,3840).to(device)
-    net = LapNet(num_high=4)
-    y = net(X)
+
